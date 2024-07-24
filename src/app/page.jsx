@@ -6,12 +6,12 @@ import {
   usePostUserMutation,
 } from "@/reducers/todoSlice/todoSlice";
 import { Suspense, useState } from "react";
-import FileBase64 from "react-file-base64";
+import toast, { Toaster } from 'react-hot-toast';
 
 const Home = () => {
   // rtk query functions
   const { data } = useGetDataQuery("");
-  const [deleteUser] = useDeleteUserMutation();
+  const [deleteUser , {isSuccess , isLoading}] = useDeleteUserMutation()
   const [postUser] = usePostUserMutation();
   console.log(data);
 
@@ -37,12 +37,13 @@ const Home = () => {
     }
   }
 
-
-
+  const success = (name) => toast.success(`Successfuly deleted ${name} !`)
+  const errors = (name) => toast.error(`User not't deleted !`)
 
 
   return (
     <main className=" min-h-screen w-[100%] bg-[#10103a]">
+      <Toaster/>
       {/* <img
         className="w-[100%]"
         src="https://img.freepik.com/premium-photo/bearded-man-wearing-glasses-remote-working-overtime-late-night-working-dark-office-using-laptop-computer-workplace_78492-42408.jpg?uid=R156212405&ga=GA1.2.462860909.1721036061&semt=ais_user"
@@ -56,10 +57,10 @@ const Home = () => {
         Post User
       </button>
       <div className="grid grid-cols-3 gap-[50px] p-[50px]">
+        <Suspense fallback={<div>Loading</div>}>
         {data?.map((el) => {
           return (
-            <Suspense fallback={<div>Loading</div>}>
-              <section onClick={() => {navigator.clipboard.writeText(el.email) , alert("text copied")}} className="border-[2px] border-[white] text-white rounded-md p-[10px] flex items-center gap-2 hover:scale-110 transition-transform duration-300 backdrop-filter backdrop-blur-[10px] bg-[#13135db0]">
+              <section onClick={() => {navigator.clipboard.writeText(el.email)}} className="border-[2px] border-[white] text-white rounded-md p-[10px] flex items-center gap-2 hover:scale-110 transition-transform duration-300 backdrop-filter backdrop-blur-[10px] bg-[#13135db0]">
                 <img
                   src={el.image}
                   alt="picture"
@@ -75,22 +76,22 @@ const Home = () => {
                   <div className="flex items-center gap-2">
                     <button
                       className="bg-[red] text-white rounded-md p-[5px_30px]"
-                      onClick={() => deleteUser(el.id)}
+                      onClick={() => {deleteUser(el.id) , isSuccess && !isLoading ? success(el.name) : errors()}}
                     >
                       Delete
                     </button>
                     <button
                       className="bg-blue-500 text-white rounded-md p-[5px_30px]"
-                      onClick={() => deleteUser(el.id)}
+                      // onClick={() => notify}
                     >
                       Edit
                     </button>
                   </div>
                 </div>
               </section>
-            </Suspense>
           );
         })}
+        </Suspense>
       </div>
 
       {postModal ? (
